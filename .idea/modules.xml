@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../BuildMatchDB/.idea/BuildMatchDB.iml" filepath="$PROJECT_DIR$/../BuildMatchDB/.idea/BuildMatchDB.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../composetest/.idea/composetest.iml" filepath="$PROJECT_DIR$/../composetest/.idea/composetest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/docker-tutorial.iml" filepath="$PROJECT_DIR$/.idea/docker-tutorial.iml" />
+    </modules>
+  </component>
+</project>
