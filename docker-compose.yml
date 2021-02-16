@@ -3,12 +3,12 @@ services:
   app:
     build: ./app
     links:
-      - db
+      - mysql_db
     ports:
       - "5000:5000"
     volumes:
       - .:/app
-  db:
+  mysql_db:
     image: mysql:latest
     command: '--default-authentication-plugin=mysql_native_password'
     restart: always

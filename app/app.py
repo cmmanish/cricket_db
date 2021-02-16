@@ -5,7 +5,7 @@ from flask import jsonify
 app = Flask(__name__)
 
 def getMysqlConnection():
-    return mysql.connector.connect(user='user', host='localhost', port='3306', password='password', database='cricketdb')
+    return mysql.connector.connect(user='user', host='mysql_db', port='3306', password='password', database='cricketdb')
 
 @app.route("/")
 def hello():
