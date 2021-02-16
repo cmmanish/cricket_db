@@ -5,7 +5,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="BuildMatchDB" />
-    <orderEntry type="module" module-name="composetest" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />

@@ -1,13 +1,16 @@
 import fnmatch
 import os
 from datetime import datetime
-import yaml
+
 import pymysql
+import yaml
 
 yaml_file_dir = '../yaml_dump/odis_male/'
-database_name="CricketDb"
-user_name="root"
-password="gofundme1"
+database_name = "CricketDb"
+user_name = "root"
+password = "gofundme1"
+
+
 def hasTwoInnings(yaml_dictionary):
     try:
         if yaml_dictionary['innings'][1]:
@@ -86,8 +89,8 @@ def yaml2list(file_name):
                     runs_total = int(value['runs']['total'])
 
                     row_tuple = (
-                    cricsheet_id, venue, year, bat_second, bat_first, ball_number, bowler_name,
-                    batsman_name, non_striker_name, run_batsman, run_extras, runs_total)
+                        cricsheet_id, venue, year, bat_second, bat_first, ball_number, bowler_name,
+                        batsman_name, non_striker_name, run_batsman, run_extras, runs_total)
 
                     db_row_list.append(row_tuple)
 
@@ -148,7 +151,7 @@ def main():
     start = datetime.now()
     for each_yaml_file in yaml_file_list:
         print("Now serving " + str(each_yaml_file))
-    #
+        #
         db_row_list = yaml2list(each_yaml_file)
         for each_row in db_row_list:
             insertOneRowToDb(each_row)

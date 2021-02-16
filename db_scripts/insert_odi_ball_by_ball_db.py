@@ -1,14 +1,17 @@
 import fnmatch
 import os
-import mysql.connector
 from datetime import datetime
+
 import mysql
+import mysql.connector
 import yaml
 
-yaml_file_dir = '../../BuildMatchDB/yaml_dump/2015_male/'
-database_name="CricketDb"
-user_name="root"
-password="password"
+from db_scripts.mysql_connect import create_connection_mysql
+
+good_team_list = ["Australia", "India", "New Zealand", "Pakistan", "England", "Sri Lanka", "West Indies",
+                  "South Africa", "Bangladesh"]
+
+
 def hasTwoInnings(yaml_dictionary):
     try:
         if yaml_dictionary['innings'][1]:
@@ -20,13 +23,19 @@ def hasTwoInnings(yaml_dictionary):
     pass
 
 
-def yaml2list(file_name):
+def convert_yaml_2_list(yaml_file_dir, file_name):
     cricsheet_id = file_name.split(".")[0];
     file = yaml_file_dir + file_name
     with open(file, 'r') as f:
 
         yaml_dictionary = yaml.load(f)
 
+        if yaml_dictionary['info']['teams']:
+            team1 = yaml_dictionary['info']['teams'][0]
+            team2 = yaml_dictionary['info']['teams'][1]
+
+            if team1 and team2 not in good_team_list:
+                return []
         if yaml_dictionary['info']['match_type'] != 'ODI':
             return []
         if yaml_dictionary['info']['gender'] != 'male':
@@ -88,24 +97,15 @@ def yaml2list(file_name):
                     runs_total = int(value['runs']['total'])
 
                     row_tuple = (
-                    cricsheet_id, venue, year, bat_second, bat_first, ball_number, bowler_name,
-                    batsman_name, non_striker_name, run_batsman, run_extras, runs_total)
+                        cricsheet_id, venue, year, bat_second, bat_first, ball_number, bowler_name,
+                        batsman_name, non_striker_name, run_batsman, run_extras, runs_total)
 
                     db_row_list.append(row_tuple)
 
     return db_row_list
+
+
 pass
-
-
-def create_connection_mysql():
-    """ create a database connection to a SQLite database """
-    try:
-        connection = mysql.connector.connect(host='localhost', database='CricketDb', user='user', password='password')
-        print("connect successful!!")
-        return connection
-    except mysql.connector.Error as e:
-        print(e)
-    return None
 
 
 def insertOneRowToDb(each_row):
@@ -114,14 +114,13 @@ def insertOneRowToDb(each_row):
         print("Going to insert " + str(each_row))
         with connection.cursor() as cursor:
 
-            sql = '''INSERT INTO odi_ball_by_ball_v2 (cricsheet_id, venue, year, ball_team, bat_team, ball_number,
+            sql = '''INSERT INTO odi_ball_by_ball (cricsheet_id, venue, year, ball_team, bat_team, ball_number,
                 bowler_name, batsman_name, non_striker_name, runs_batsman, runs_extras, runs_total)
                 VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ,%s) '''
             print(sql)
             cursor.execute(sql, each_row)
             connection.commit()
             print(str(each_row[0]) + ' inserted to db')
-
 
     except mysql.connector.Error as e:
         # Rolling back in case of error
@@ -132,7 +131,7 @@ def insertOneRowToDb(each_row):
     connection.close()
 
 
-def list_all_files():
+def list_all_files(yaml_file_dir):
     yaml_file_list = []
     listOfFiles = os.listdir(yaml_file_dir)
     pattern = "*.yaml"
@@ -143,17 +142,21 @@ def list_all_files():
 
 
 def main():
-    yaml_file_list = list_all_files()
-    print(str(len(yaml_file_list)) + " YAML files one per match")
+    # year_array = ["2021", "2020", "2019", "2018", "2018", "2017", "2016", "2016", "2015"]
+    year_array = ["2021"]
+    for year in year_array:
+        yaml_file_dir = "../../BuildMatchDB/yaml_dump/" + year + "_male/"
+        yaml_file_list = list_all_files(yaml_file_dir)
+        print(str(len(yaml_file_list)) + " YAML files one per match")
 
-    start = datetime.now()
-    for each_yaml_file in yaml_file_list:
-        print("Now serving " + str(each_yaml_file))
-    #
-        db_row_list = yaml2list(each_yaml_file)
-        for each_row in db_row_list:
-            insertOneRowToDb(each_row)
-            print('Insert to db took ' + str(datetime.now() - start))
+        start = datetime.now()
+        for each_yaml_file in yaml_file_list:
+            print("Now reading " + str(each_yaml_file))
+            #
+            db_row_list = convert_yaml_2_list(yaml_file_dir, each_yaml_file)
+            for each_row in db_row_list:
+                insertOneRowToDb(each_row)
+                print('Insert to db took ' + str(datetime.now() - start))
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ def create_connection_mysql():
     """ create a database connection to a SQLite database """
 
     try:
-        connection = mysql.connector.connect(host='localhost', database='CricketDb', user='user', password='password')
+        connection = mysql.connector.connect(host='localhost', database='cricketdb', user='user', password='password')
         print("connect successful!!")
         return connection
     except mysql.connector.Error as e:
@@ -14,7 +14,7 @@ def create_connection_mysql():
     return None
 
 
-def getRunCount(batsman,year):
+def getRunCount(batsman, year):
     try:
         connection = create_connection_mysql()
         with connection.cursor() as cursor:
@@ -22,7 +22,7 @@ def getRunCount(batsman,year):
             # SQL
             sql = "select count(runs_batsman) from odi_ball_by_ball_v2 where  batsman_name like'%Kohli%' and year=2019"
 
-            # Execute query.
+            # Execute query.=
             cursor.execute(sql)
 
             print("cursor.lastrowid: ", cursor.lastrowid)
@@ -35,6 +35,7 @@ def getRunCount(batsman,year):
 
     finally:
         connection.close()
+
 
 def truncate_table():
     try:
@@ -55,5 +56,5 @@ def truncate_table():
 
 
 if __name__ == '__main__':
-    getRunCount("Kohli",2019)
+    getRunCount("Kohli", 2019)
     # truncate_table()

@@ -1,10 +1,6 @@
-Code for a creating a docker app with Flask and MySQL tutorial
-
-Refer to [blog post about creating a flask-mysql app with docker](https://stavshamir.github.io/python/dockerizing-a-flask-mysql-app-with-docker-compose/)
-
-## GitLab CI
-
-The [.gitlab-ci.yml](.gitlab-ci.yml) file can be used in GitLab to build,
-test, and deploy the code, as in https://gitlab.com/TrendDotFarm/docker-tutorial
-For more information, read the [Docker Compose Integration to GitLab
-CI](GitLab-CI.md) guide.
+Log into Db:
+`docker exec -it docker-tutorial_db_1 mysql -u root -ppassword`
+Create user
+`CREATE USER 'user'@'%' IDENTIFIED BY 'password';`
+Grant Perm
+`GRANT ALL PRIVILEGES ON cricketdb.* to 'user'@'%';`

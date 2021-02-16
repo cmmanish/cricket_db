@@ -1,31 +1,28 @@
 version: "3.7"
 services:
   app:
-    build: .
+    build: ./app
     links:
-      - mysql_db
+      - db
     ports:
-      - "6000:6000"
+      - "5000:5000"
     volumes:
-      - .:/code
-  mysql_db:
-      image: mysql:latest
-      command: --default-authentication-plugin=mysql_native_password
-      environment:
-        MYSQL_ROOT_PASSWORD: password
-        MYSQL_ROOT_HOST: '%'  # needs to be enclosed with quotes
-      ports:
-        - 3306:3306
-      volumes:
-        - mysql_data:/var/lib/mysql
+      - .:/app
+  db:
+    image: mysql:latest
+    command: '--default-authentication-plugin=mysql_native_password'
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_HOST: '%'  # needs to be enclosed with quotes
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/:ro
+      - mysql_data:/var/lib/mysql
+
   redis:
     image: "redis:alpine"
-  adminer_container:
-      image: adminer:latest
-      environment:
-        ADMINER_DEFAULT_SERVER: mysql_db_container
-      ports:
-        - 8080:8080
 
 volumes:
   mysql_data:

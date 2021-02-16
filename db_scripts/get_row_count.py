@@ -1,40 +1,23 @@
 #!/usr/bin/python
 import mysql.connector
 
-
-def create_connection_mysql():
-    """ create a database connection to a SQLite database """
-
-    try:
-        connection = mysql.connector.connect(host='127.0.0.1', database='CricketDb', user='user', password='password')
-        print("connect successful!!")
-        return connection
-    except mysql.connector.Error as e:
-        print(e)
-    return None
+from db_scripts.mysql_connect import create_connection_mysql
 
 
 def getRowCount():
     try:
         connection = create_connection_mysql()
         with connection.cursor() as cursor:
-
             # SQL
             sql = "select count(*) from odi_ball_by_ball;"
-
             # Execute query.
             cursor.execute(sql)
-
             print("cursor.lastrowid: ", cursor.lastrowid)
-
             for row in cursor:
                 print(row)
-
-            # cursor.execute('''SELECT count(*) FROM odi_ball_by_ball ''')
-            # return cursor.lastrowid
-
     finally:
         connection.close()
+
 
 def truncate_table():
     try:
