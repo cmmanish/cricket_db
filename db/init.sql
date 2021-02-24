@@ -1,6 +1,3 @@
-CREATE DATABASE cricketdb;
-use cricketdb;
-
 CREATE TABLE IF NOT EXISTS odi_ball_by_ball (
 `id`	INTEGER NOT NULL AUTO_INCREMENT,
 `cricsheet_id` INTEGER NOT NULL,
@@ -15,5 +12,8 @@ CREATE TABLE IF NOT EXISTS odi_ball_by_ball (
 `runs_batsman`	INTEGER,
 `runs_extras`	INTEGER,
 `runs_total`	INTEGER,
+`wicket`        TEXT,
+`player_out`        TEXT,
+`wicket_type`        TEXT,
 PRIMARY KEY(`id`)
 );

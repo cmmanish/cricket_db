@@ -170,9 +170,9 @@ def list_all_files(yaml_file_dir):
 #                 print('Insert to db took ' + str(datetime.now() - start))
 
 def main():
-    # year_array = ["2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005"]
-    # year_array = ["2018", "2018", "2017", "2016", "2016", "2015"]
-    year_array = ["2005"]
+    # year_array = ["2018", "2018", "2017", "2016", "2016", "2015","2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006"]
+    year_array = ["2019", "2020", "2021"]
+    # year_array = ["2005"]
     for year in year_array:
         yaml_file_dir = "../../BuildMatchDB/yaml_dump/" + year + "_male/"
         yaml_file_list = list_all_files(yaml_file_dir)

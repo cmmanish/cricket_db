@@ -19,7 +19,7 @@ services:
       MYSQL_ROOT_HOST: '%'  # needs to be enclosed with quotes
     volumes:
       - ./db:/docker-entrypoint-initdb.d/:ro
-      - mysql_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
 
   redis:
     image: "redis:alpine"

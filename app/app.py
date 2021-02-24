@@ -5,14 +5,14 @@ from flask import jsonify
 app = Flask(__name__)
 
 def getMysqlConnection():
-    return mysql.connector.connect(user='user', host='mysql_db', port='3306', password='password', database='cricketdb')
+    return mysql.connector.connect(user='root', host='mysql_db', port='3306', password='password', database='cricketdb')
 
 @app.route("/")
 def hello():
     db = getMysqlConnection()
     print(db)
     try:
-        sqlstr = "SELECT count(*) from odi_ball_by_ball;"
+        sqlstr = "select year, count(*) as no_of_balls_bowled from odi_ball_by_ball group by year order by year;"
         print(sqlstr)
         cur = db.cursor()
         cur.execute(sqlstr)
