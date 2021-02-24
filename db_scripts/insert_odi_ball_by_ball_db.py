@@ -1,7 +1,7 @@
 import fnmatch
 import os
 from datetime import datetime
-
+import pandas as pd
 import mysql
 import mysql.connector
 import yaml
@@ -41,12 +41,11 @@ def convert_yaml_2_list(yaml_file_dir, file_name):
         if yaml_dictionary['info']['gender'] != 'male':
             return []
         try:
-            year = int(file.split("_male")[0].split("/")[2])
+            year = int(str(yaml_dictionary['info']['dates'][0]).split("-")[0])
             print(year)
         except:
             print("yaml_dictionary['info']['dates'][0].year Missing")
             year = 0000
-
         try:
             venue = str(yaml_dictionary['info']['city'])
             # print(yaml_dictionary)
@@ -60,7 +59,6 @@ def convert_yaml_2_list(yaml_file_dir, file_name):
         try:
             if yaml_dictionary['innings'][1]:
                 bat_second = str(yaml_dictionary['innings'][1]['2nd innings']['team'])
-
         except:
             bat_second = ""
         delivery_list_1 = yaml_dictionary['innings'][0]['1st innings']['deliveries']
@@ -72,14 +70,22 @@ def convert_yaml_2_list(yaml_file_dir, file_name):
                 bowler_name = str(value['bowler'])
                 batsman_name = str(value['batsman'])
                 non_striker_name = str(value['non_striker'])
-                run_extras = int(value['runs']['extras'])
                 run_batsman = int(value['runs']['batsman'])
+                run_extras = int(value['runs']['extras'])
                 runs_total = int(value['runs']['total'])
 
+                try:
+                    if value['wicket']:
+                        wicket = 1
+                        player_out = str(value['wicket']['player_out'])
+                        wicket_type = str(value['wicket']['kind'])
+                except:
+                    wicket = 0
+                    player_out = ""
+                    wicket_type = ""
                 row_tuple = (cricsheet_id,
-                             venue, year, bat_first, bat_second, ball_number, bowler_name,
-                             batsman_name,
-                             non_striker_name, run_batsman, run_extras, runs_total)
+                             venue, year, bat_first, bat_second, ball_number, bowler_name, batsman_name,
+                             non_striker_name, run_batsman, run_extras, runs_total,wicket, player_out, wicket_type)
 
                 db_row_list.append(row_tuple)
 
@@ -92,44 +98,49 @@ def convert_yaml_2_list(yaml_file_dir, file_name):
                     bowler_name = str(value['bowler'])
                     batsman_name = str(value['batsman'])
                     non_striker_name = str(value['non_striker'])
-                    run_extras = int(value['runs']['extras'])
                     run_batsman = int(value['runs']['batsman'])
+                    run_extras = int(value['runs']['extras'])
                     runs_total = int(value['runs']['total'])
 
-                    row_tuple = (
-                        cricsheet_id, venue, year, bat_second, bat_first, ball_number, bowler_name,
-                        batsman_name, non_striker_name, run_batsman, run_extras, runs_total)
+                    try:
+                        if value['wicket']:
+                            wicket = 1
+                            player_out = str(value['wicket']['player_out'])
+                            wicket_type = str(value['wicket']['kind'])
+                    except:
+                        wicket = 0
+                        player_out = ""
+                        wicket_type = ""
+                    row_tuple = (cricsheet_id,
+                                 venue, year, bat_first, bat_second, ball_number, bowler_name, batsman_name,
+                                 non_striker_name, run_batsman, run_extras, runs_total, wicket, player_out, wicket_type)
 
                     db_row_list.append(row_tuple)
-
     return db_row_list
 
 
-pass
-
-
-def insertOneRowToDb(each_row):
-    connection = create_connection_mysql()
+def insert_multiple_row_to_db(records_to_insert):
+    row_count = len(records_to_insert)
+    print("Total row to insert: " + str(row_count))
     try:
-        print("Going to insert " + str(each_row))
-        with connection.cursor() as cursor:
+        connection = create_connection_mysql()
+        mySQL_insert_query = '''INSERT INTO odi_ball_by_ball (cricsheet_id, venue, year, ball_team, bat_team, ball_number,
+                        bowler_name, batsman_name, non_striker_name, runs_batsman, runs_extras, runs_total, wicket, player_out, wicket_type)
+                        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s , %s, %s, %s, %s) '''
 
-            sql = '''INSERT INTO odi_ball_by_ball (cricsheet_id, venue, year, ball_team, bat_team, ball_number,
-                bowler_name, batsman_name, non_striker_name, runs_batsman, runs_extras, runs_total)
-                VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ,%s) '''
-            print(sql)
-            cursor.execute(sql, each_row)
-            connection.commit()
-            print(str(each_row[0]) + ' inserted to db')
+        cursor = connection.cursor()
+        cursor.executemany(mySQL_insert_query, records_to_insert)
+        connection.commit()
+        print(cursor.rowcount, "Record inserted successfully into Laptop table")
 
-    except mysql.connector.Error as e:
-        # Rolling back in case of error
-        connection.rollback()
-        print(e)
-    # Closing the connection
-    print("Data inserted")
-    connection.close()
+    except mysql.connector.Error as error:
+        print("Failed to insert record into MySQL table {}".format(error))
 
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
 
 def list_all_files(yaml_file_dir):
     yaml_file_list = []
@@ -141,23 +152,40 @@ def list_all_files(yaml_file_dir):
     return yaml_file_list
 
 
+# def main1():
+#     # year_array = ["2019", "2018", "2018", "2017", "2016", "2016", "2015"]
+#     year_array = ["2020"]
+#     for year in year_array:
+#         yaml_file_dir = "../../BuildMatchDB/yaml_dump/" + year + "_male/"
+#         yaml_file_list = list_all_files(yaml_file_dir)
+#         print(str(len(yaml_file_list)) + " YAML files one per match for year " + year)
+#
+#         start = datetime.now()
+#         for each_yaml_file in yaml_file_list:
+#             print("Now reading " + str(each_yaml_file))
+#             #
+#             db_row_list = convert_yaml_2_list(yaml_file_dir, each_yaml_file)
+#             for each_row in db_row_list:
+#                 insertOneRowToDb(each_row)
+#                 print('Insert to db took ' + str(datetime.now() - start))
+
 def main():
-    # year_array = ["2021", "2020", "2019", "2018", "2018", "2017", "2016", "2016", "2015"]
-    year_array = ["2021"]
+    # year_array = ["2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005"]
+    # year_array = ["2018", "2018", "2017", "2016", "2016", "2015"]
+    year_array = ["2005"]
     for year in year_array:
         yaml_file_dir = "../../BuildMatchDB/yaml_dump/" + year + "_male/"
         yaml_file_list = list_all_files(yaml_file_dir)
-        print(str(len(yaml_file_list)) + " YAML files one per match")
+        print(str(len(yaml_file_list)) + " YAML files one per match for year " + year)
 
         start = datetime.now()
         for each_yaml_file in yaml_file_list:
             print("Now reading " + str(each_yaml_file))
-            #
-            db_row_list = convert_yaml_2_list(yaml_file_dir, each_yaml_file)
-            for each_row in db_row_list:
-                insertOneRowToDb(each_row)
-                print('Insert to db took ' + str(datetime.now() - start))
 
+            db_row_list = convert_yaml_2_list(yaml_file_dir, each_yaml_file)
+            if db_row_list != []:
+                insert_multiple_row_to_db(db_row_list)
+                print('Insert to db took ' + str(datetime.now() - start))
 
 if __name__ == '__main__':
     main()

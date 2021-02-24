@@ -39,4 +39,4 @@ def truncate_table():
 
 if __name__ == '__main__':
     getRowCount()
-    # truncate_table()
+    truncate_table()

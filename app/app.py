@@ -12,7 +12,7 @@ def hello():
     db = getMysqlConnection()
     print(db)
     try:
-        sqlstr = "SELECT * from odi_ball_by_ball;"
+        sqlstr = "SELECT count(*) from odi_ball_by_ball;"
         print(sqlstr)
         cur = db.cursor()
         cur.execute(sqlstr)

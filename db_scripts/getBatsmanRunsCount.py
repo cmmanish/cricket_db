@@ -20,7 +20,7 @@ def getRunCount(batsman, year):
         with connection.cursor() as cursor:
 
             # SQL
-            sql = "select count(runs_batsman) from odi_ball_by_ball_v2 where  batsman_name like'%Kohli%' and year=2019"
+            sql = "select count(runs_batsman) from odi_ball_by_ball where  batsman_name like'%Kohli%' and year=2019"
 
             # Execute query.=
             cursor.execute(sql)
@@ -56,5 +56,5 @@ def truncate_table():
 
 
 if __name__ == '__main__':
-    getRunCount("Kohli", 2019)
+    getRunCount("Kohli", 2020)
     # truncate_table()
